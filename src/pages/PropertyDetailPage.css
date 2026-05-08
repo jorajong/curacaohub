@@ -1,0 +1,272 @@
+.property-detail {
+  padding: 40px 0;
+}
+
+.breadcrumb {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 30px;
+}
+
+.breadcrumb a {
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.property-header {
+  margin-bottom: 30px;
+}
+
+.property-header h1 {
+  font-size: 32px;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.property-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.property-images {
+  margin-bottom: 40px;
+}
+
+.main-image {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-images {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.thumbnail-images img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.thumbnail-images img:hover {
+  transform: scale(1.05);
+}
+
+.property-body {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+}
+
+.property-section {
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+
+.property-section:last-child {
+  border-bottom: none;
+}
+
+.property-section h2 {
+  font-size: 18px;
+  color: var(--primary);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.property-section p {
+  font-size: 14px;
+  color: var(--text-light);
+  line-height: 1.7;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amenity-icon {
+  font-size: 24px;
+}
+
+.amenity-label {
+  font-size: 14px;
+  color: var(--text-dark);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item label {
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.detail-item span {
+  font-size: 16px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.cancellation {
+  background: #e8f5e9;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #4caf50;
+  font-size: 13px;
+  color: #2e7d32;
+}
+
+.property-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.booking-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  position: sticky;
+  top: 100px;
+}
+
+.price-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.amount {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.period {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.booking-form {
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.btn-full {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.interest-form {
+  background: var(--light-bg);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.interest-form h3 {
+  font-size: 16px;
+  color: var(--primary);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.interest-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.interest-form textarea {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+@media (max-width: 768px) {
+  .property-body {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-card {
+    position: static;
+  }
+
+  .thumbnail-images {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
