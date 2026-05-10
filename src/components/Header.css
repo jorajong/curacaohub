@@ -19,19 +19,28 @@
   gap: 10px;
 }
 
-.logo h1 {
+.logo-text h1 {
   font-size: 24px;
   color: var(--primary);
   font-weight: 700;
   letter-spacing: 2px;
 }
 
-.logo p {
+.logo-text p {
   font-size: 11px;
   color: var(--text-light);
   letter-spacing: 1px;
 }
 
+.logo-image {
+  width: 280px;
+  height: auto;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
 .nav {
   display: flex;
   gap: 30px;
@@ -39,9 +48,9 @@
 }
 
 .nav a {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--text-dark);
+  color: #05224D;
   letter-spacing: 0.5px;
   transition: color 0.3s;
 }
@@ -70,9 +79,13 @@
     gap: 15px;
   }
 
-  .nav a {
-    font-size: 11px;
-  }
+.nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: #05224D;
+  letter-spacing: 0.5px;
+  transition: color 0.3s;
+}
 
   .btn-login {
     padding: 8px 15px;

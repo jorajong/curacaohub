@@ -50,10 +50,10 @@ function Hero() {
                 <option>4+ personen</option>
               </select>
             </div>
-            
             <button type="submit" className="search-btn">
               <span>🔍</span> ZOEKEN
             </button>
+            
           </form>
         </div>
 
