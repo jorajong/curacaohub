@@ -1,6 +1,6 @@
 .hero {
   position: relative;
-  height: 600px;
+  height: 500px;
   display: flex;
   align-items: center;
   margin-bottom: 60px;
@@ -25,7 +25,8 @@
 .hero-content {
   position: relative;
   z-index: 10;
-  max-width: 600px;
+  max-width: 100%;
+  width: 100%;
   padding: 40px;
   color: white;
 }
@@ -43,24 +44,29 @@
   opacity: 0.95;
 }
 
-.search-box {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  color: var(--text-dark);
-}
-
 .search-box form {
   display: flex;
   gap: 15px;
   align-items: flex-end;
+  flex-wrap: nowrap;
 }
 
 .search-group {
   flex: 1;
+  min-width: 140px;
   display: flex;
   flex-direction: column;
+}
+
+.search-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  z-index: 10;
+  max-width: 1400px;
+  margin-bottom: 20px;
+  margin-top: 160px;
 }
 
 .search-group label {
@@ -104,6 +110,8 @@
   align-items: center;
   gap: 8px;
   transition: background 0.3s;
+  border: none;
+  cursor: pointer;
 }
 
 .search-btn:hover {

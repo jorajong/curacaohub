@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../images/logohub.png';
 import './Header.css';
 
 function Header() {
@@ -8,8 +9,7 @@ function Header() {
       <div className="container">
         <div className="header-content">
           <Link to="/" className="logo">
-            <h1>HUB</h1>
-            <p>Huisvesting voor unieke breaks op Curaçao</p>
+            <img src={logo} alt="HUB Logo" className="logo-image" />
           </Link>
           <nav className="nav">
             <a href="#home">HOME</a>
