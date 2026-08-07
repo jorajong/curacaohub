@@ -97,21 +97,21 @@ function WoningenPage() {
           </div>
 
           <div className="search-group">
-            <label>SLAAPKAMERS</label>
-            <select value={slaapkamers} onChange={(e) => handleFilterChange('slaapkamers', e.target.value)}>
-              <option value="">Alle</option>
-              {SLAAPKAMER_OPTIES.map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="search-group">
             <label>GASTEN</label>
             <select value={gasten} onChange={(e) => handleFilterChange('gasten', e.target.value)}>
               <option value="">Alle</option>
               {GASTEN_OPTIES.map((n) => (
                 <option key={n} value={n}>{n}+ {n === 1 ? 'persoon' : 'personen'}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="search-group">
+            <label>SLAAPKAMERS</label>
+            <select value={slaapkamers} onChange={(e) => handleFilterChange('slaapkamers', e.target.value)}>
+              <option value="">Alle</option>
+              {SLAAPKAMER_OPTIES.map((n) => (
+                <option key={n} value={n}>{n}</option>
               ))}
             </select>
           </div>

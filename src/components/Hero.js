@@ -33,48 +33,48 @@ function Hero() {
     <section className="hero">
       <div className="hero-image">
         <img src={heroImage} alt="Historisch pand in Scharloo, Curaçao" />
-      </div>
-      <div className="hero-content">
-        <h1>Jouw huisvesting op Curaçao</h1>
-        <p>voor een verblijf van 1 - 6 maanden</p>
-
-        <div className="search-box">
-          <form onSubmit={handleSearch}>
-            <div className="search-group">
-              <label>LOCATIE</label>
-              <select value={locatie} onChange={(e) => setLocatie(e.target.value)}>
-                <option value="">Alle locaties</option>
-                {locaties.map((loc) => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="search-group">
-              <label>SLAAPKAMERS</label>
-              <select value={slaapkamers} onChange={(e) => setSlaapkamers(e.target.value)}>
-                <option value="">Alle</option>
-                {SLAAPKAMER_OPTIES.map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="search-group">
-              <label>GASTEN</label>
-              <select value={gasten} onChange={(e) => setGasten(e.target.value)}>
-                <option value="">Alle</option>
-                {GASTEN_OPTIES.map((n) => (
-                  <option key={n} value={n}>{n}+ {n === 1 ? 'persoon' : 'personen'}</option>
-                ))}
-              </select>
-            </div>
-
-            <button type="submit" className="search-btn">
-              <span>🔍</span> ZOEKEN
-            </button>
-          </form>
+        <div className="hero-text">
+          <h1>Jouw huisvesting op Curaçao</h1>
+          <p>voor een verblijf van 1 - 6 maanden</p>
         </div>
+      </div>
+
+      <div className="search-box">
+        <form onSubmit={handleSearch}>
+          <div className="search-group">
+            <label>LOCATIE</label>
+            <select value={locatie} onChange={(e) => setLocatie(e.target.value)}>
+              <option value="">Alle locaties</option>
+              {locaties.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="search-group">
+            <label>GASTEN</label>
+            <select value={gasten} onChange={(e) => setGasten(e.target.value)}>
+              <option value="">Alle</option>
+              {GASTEN_OPTIES.map((n) => (
+                <option key={n} value={n}>{n}+ {n === 1 ? 'persoon' : 'personen'}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="search-group">
+            <label>SLAAPKAMERS</label>
+            <select value={slaapkamers} onChange={(e) => setSlaapkamers(e.target.value)}>
+              <option value="">Alle</option>
+              {SLAAPKAMER_OPTIES.map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+
+          <button type="submit" className="search-btn">
+            <span>🔍</span> ZOEKEN
+          </button>
+        </form>
       </div>
     </section>
   );
