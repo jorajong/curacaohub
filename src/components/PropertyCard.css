@@ -143,3 +143,16 @@
 .view-btn:hover {
   color: var(--primary);
 }
+
+@media (max-width: 768px) {
+  .favorite-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .view-btn {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+}

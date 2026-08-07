@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
+  padding: 12px 0;
 }
 
 .logo {
@@ -33,7 +33,7 @@
 }
 
 .logo-image {
-  width: 220px;
+  width: 160px;
   height: auto;
 }
 
@@ -74,21 +74,57 @@
   background: #c39460;
 }
 
-@media (max-width: 768px) {
-  .nav {
-    gap: 15px;
-  }
-
-.nav a {
-  font-size: 14px;
-  font-weight: 500;
-  color: #05224D;
+/* Mobiel menu-knop: standaard verborgen, alleen zichtbaar op smalle schermen */
+.menu-toggle {
+  display: none;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0.5px;
-  transition: color 0.3s;
+  cursor: pointer;
 }
 
-  .btn-login {
-    padding: 8px 15px;
-    font-size: 10px;
+.menu-toggle:hover {
+  background: #152843;
+}
+
+/* Uitklappend mobiel menu, alleen gerenderd als het open staat */
+.nav-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 4px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-mobile a {
+  padding: 12px 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #05224D;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.nav-mobile a:hover {
+  background: var(--light-bg);
+}
+
+.nav-mobile .btn-login {
+  margin-top: 8px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .nav-desktop {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: inline-block;
   }
 }
