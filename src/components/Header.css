@@ -60,8 +60,10 @@
 }
 
 .nav-favorites {
-  font-size: 26px;
+  font-size: 38px;
   line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .btn-login {
