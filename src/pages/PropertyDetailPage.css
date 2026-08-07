@@ -270,3 +270,18 @@
     grid-template-columns: 1fr;
   }
 }
+.thumbnail-images img {
+  border: 3px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+  opacity: 0.75;
+}
+
+.thumbnail-images img:hover {
+  opacity: 1;
+}
+
+.thumbnail-images img.active {
+  border-color: #d4a574;
+  opacity: 1;
+}
