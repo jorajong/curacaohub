@@ -8,6 +8,12 @@
   margin-bottom: 24px;
 }
 
+.empty-message {
+  color: var(--text-light);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
 .filter-bar {
   display: flex;
   gap: 15px;

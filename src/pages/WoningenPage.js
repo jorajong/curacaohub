@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import PropertyCard from '../components/PropertyCard';
 import { getDistinctLocaties } from '../utils/locaties';
@@ -8,6 +8,23 @@ import './WoningenPage.css';
 
 const SLAAPKAMER_OPTIES = [1, 2, 3, 4, 5, 6];
 const GASTEN_OPTIES = [1, 2, 3, 4, 5, 6];
+
+function mapDocToProperty(docSnap) {
+  const d = docSnap.data();
+  return {
+    id: docSnap.id,
+    name: d.naam,
+    location: d.locatie,
+    image: Array.isArray(d.images) && d.images.length > 0 ? d.images[0] : '',
+    tag: Array.isArray(d.tag) ? d.tag[0] : d.tag,
+    guests: d.gasten,
+    beds: d.slaapkamers,
+    sqm: d.oppervlakte,
+    price: d.prijs,
+    valuta: d.valuta || 'EUR',
+    periode: d.periode || 'maand'
+  };
+}
 
 function WoningenPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,6 +35,7 @@ function WoningenPage() {
   const locatie = searchParams.get('locatie') || '';
   const slaapkamers = searchParams.get('slaapkamers') || '';
   const gasten = searchParams.get('gasten') || '';
+  const alleenFavorieten = searchParams.get('favorieten') === 'true';
 
   useEffect(() => {
     getDistinctLocaties()
@@ -28,32 +46,35 @@ function WoningenPage() {
   const fetchProperties = useCallback(async () => {
     setLoading(true);
     try {
-      const constraints = [where('gepubliceerd', '==', true)];
-      if (locatie) constraints.push(where('locatie', '==', locatie));
-      if (slaapkamers) constraints.push(where('slaapkamers', '==', Number(slaapkamers)));
+      let data;
 
-      const q = query(collection(db, 'properties'), ...constraints);
-      const snapshot = await getDocs(q);
+      if (alleenFavorieten) {
+        // Favorieten-modus: ID's komen uit localStorage, niet uit een Firestore-query
+        const ids = JSON.parse(localStorage.getItem('favorieten') || '[]');
+        if (ids.length === 0) {
+          setProperties([]);
+          return;
+        }
+        const docs = await Promise.all(ids.map((id) => getDoc(doc(db, 'properties', id))));
+        data = docs
+          .filter((docSnap) => docSnap.exists() && docSnap.data().gepubliceerd)
+          .map(mapDocToProperty);
+      } else {
+        const constraints = [where('gepubliceerd', '==', true)];
+        if (locatie) constraints.push(where('locatie', '==', locatie));
+        if (slaapkamers) constraints.push(where('slaapkamers', '==', Number(slaapkamers)));
 
-      let data = snapshot.docs.map((docSnap) => {
-        const d = docSnap.data();
-        return {
-          id: docSnap.id,
-          name: d.naam,
-          location: d.locatie,
-          image: Array.isArray(d.images) && d.images.length > 0 ? d.images[0] : '',
-          tag: Array.isArray(d.tag) ? d.tag[0] : d.tag,
-          guests: d.gasten,
-          beds: d.slaapkamers,
-          sqm: d.oppervlakte,
-          price: d.prijs,
-          valuta: d.valuta || 'EUR',
-          periode: d.periode || 'maand'
-        };
-      });
+        const q = query(collection(db, 'properties'), ...constraints);
+        const snapshot = await getDocs(q);
+        data = snapshot.docs.map(mapDocToProperty);
+      }
 
-      // Gasten-filter (minimaal aantal) doen we client-side, zodat we geen
-      // Firestore composite index nodig hebben naast de where()-filters hierboven.
+      // Locatie/slaapkamers-filters ook toepassen binnen favorieten, en de
+      // gasten-filter (minimaal aantal) altijd client-side, zoals eerder.
+      if (alleenFavorieten) {
+        if (locatie) data = data.filter((p) => p.location === locatie);
+        if (slaapkamers) data = data.filter((p) => Number(p.beds) === Number(slaapkamers));
+      }
       if (gasten) {
         data = data.filter((p) => (p.guests || 0) >= Number(gasten));
       }
@@ -64,7 +85,7 @@ function WoningenPage() {
     } finally {
       setLoading(false);
     }
-  }, [locatie, slaapkamers, gasten]);
+  }, [locatie, slaapkamers, gasten, alleenFavorieten]);
 
   useEffect(() => {
     fetchProperties();
@@ -83,7 +104,7 @@ function WoningenPage() {
   return (
     <main className="woningen-page">
       <div className="container">
-        <h1 className="page-title">Alle woningen</h1>
+        <h1 className="page-title">{alleenFavorieten ? 'Mijn favorieten' : 'Alle woningen'}</h1>
 
         <div className="filter-bar">
           <div className="search-group">
@@ -120,7 +141,11 @@ function WoningenPage() {
         {loading ? (
           <p>Woningen laden...</p>
         ) : properties.length === 0 ? (
-          <p>Geen woningen gevonden met deze filters.</p>
+          <p className="empty-message">
+            {alleenFavorieten
+              ? "Je hebt nog geen woningen als favoriet gemarkeerd. Klik op het hartje bij een woning om 'm hier te bewaren."
+              : 'Geen woningen gevonden met deze filters.'}
+          </p>
         ) : (
           <div className="properties-grid">
             {properties.map((property) => (
