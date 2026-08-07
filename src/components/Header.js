@@ -12,12 +12,12 @@ function Header() {
             <img src={logo} alt="HUB Logo" className="logo-image" />
           </Link>
           <nav className="nav">
-            <a href="#home">HOME</a>
-            <a href="#woningen">WONINGEN</a>
+            <Link to="/">HOME</Link>
+            <Link to="/woningen">WONINGEN</Link>
             <a href="#verhuurdersinfo">VERHUURDERSINFO</a>
             <a href="#over-ons">OVER ONS</a>
             <a href="#contact">CONTACT</a>
-            <button className="btn-login">PLAATS JOUW WONING</button>
+            <Link to="/beheer/nieuwe-woning" className="btn-login">PLAATS JOUW WONING</Link>
           </nav>
         </div>
       </div>

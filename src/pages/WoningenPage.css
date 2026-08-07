@@ -1,0 +1,76 @@
+.woningen-page {
+  padding: 40px 0 60px;
+}
+
+.page-title {
+  font-size: 28px;
+  color: var(--primary);
+  margin-bottom: 24px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  background: white;
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 32px;
+}
+
+.filter-bar .search-group {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-bar .search-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.filter-bar .search-group select {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  color: var(--text-dark);
+}
+
+.properties-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1200px) {
+  .properties-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .properties-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .properties-grid {
+    grid-template-columns: 1fr;
+  }
+}

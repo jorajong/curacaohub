@@ -1,65 +1,79 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Hero.css';
+import heroImage from '../images/hero-scharloo.jpg';
+import { getDistinctLocaties } from '../utils/locaties';
+
+const SLAAPKAMER_OPTIES = [1, 2, 3, 4, 5, 6];
+const GASTEN_OPTIES = [1, 2, 3, 4, 5, 6];
 
 function Hero() {
-  const [location, setLocation] = useState('Curaçao');
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
-  const [guests, setGuests] = useState('1 persoon');
+  const navigate = useNavigate();
+  const [locaties, setLocaties] = useState([]);
+  const [locatie, setLocatie] = useState('');
+  const [slaapkamers, setSlaapkamers] = useState('');
+  const [gasten, setGasten] = useState('');
+
+  useEffect(() => {
+    getDistinctLocaties()
+      .then(setLocaties)
+      .catch((error) => console.error('Fout bij ophalen locaties:', error));
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('Zoeken:', { location, checkIn, checkOut, guests });
+    const params = new URLSearchParams();
+    if (locatie) params.set('locatie', locatie);
+    if (slaapkamers) params.set('slaapkamers', slaapkamers);
+    if (gasten) params.set('gasten', gasten);
+    navigate(`/woningen?${params.toString()}`);
   };
 
   return (
     <section className="hero">
       <div className="hero-image">
-        <img src="https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=1200&h=600&fit=crop" alt="Luxury villa in Curaçao" />
+        <img src={heroImage} alt="Historisch pand in Scharloo, Curaçao" />
       </div>
       <div className="hero-content">
-        <h1>Vind jouw plek op Curaçao</h1>
-        <p>Huisvesting voor unieke breaks — Rechtstreeks van eigenaar tot gast gereageerd.</p>
-        
+        <h1>Jouw huisvesting op Curaçao</h1>
+        <p>voor een verblijf van 1 - 6 maanden</p>
+
         <div className="search-box">
           <form onSubmit={handleSearch}>
             <div className="search-group">
               <label>LOCATIE</label>
-              <select value={location} onChange={(e) => setLocation(e.target.value)}>
-                <option>Curaçao</option>
-                <option>Willemstad</option>
-                <option>Lagunilla</option>
+              <select value={locatie} onChange={(e) => setLocatie(e.target.value)}>
+                <option value="">Alle locaties</option>
+                {locaties.map((loc) => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
               </select>
             </div>
-            
+
             <div className="search-group">
-              <label>DATUMS</label>
-              <div className="date-range">
-                <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} placeholder="Check-in" />
-                <span>—</span>
-                <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} placeholder="Check-out" />
-              </div>
+              <label>SLAAPKAMERS</label>
+              <select value={slaapkamers} onChange={(e) => setSlaapkamers(e.target.value)}>
+                <option value="">Alle</option>
+                {SLAAPKAMER_OPTIES.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
             </div>
-            
+
             <div className="search-group">
               <label>GASTEN</label>
-              <select value={guests} onChange={(e) => setGuests(e.target.value)}>
-                <option>1 persoon</option>
-                <option>2 personen</option>
-                <option>3 personen</option>
-                <option>4+ personen</option>
+              <select value={gasten} onChange={(e) => setGasten(e.target.value)}>
+                <option value="">Alle</option>
+                {GASTEN_OPTIES.map((n) => (
+                  <option key={n} value={n}>{n}+ {n === 1 ? 'persoon' : 'personen'}</option>
+                ))}
               </select>
             </div>
+
             <button type="submit" className="search-btn">
               <span>🔍</span> ZOEKEN
             </button>
-            
           </form>
-        </div>
-
-        <div className="hero-ctas">
-          <button className="cta-primary">BEKIJK WONINGEN</button>
-          <button className="cta-secondary">PLAATS JOUW WONING</button>
         </div>
       </div>
     </section>

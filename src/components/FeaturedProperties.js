@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import PropertyCard from './PropertyCard';
@@ -62,7 +63,7 @@ function FeaturedProperties() {
         )}
 
         <div className="view-all">
-          <button className="btn-primary">BEKIJK ALLE WONINGEN →</button>
+          <Link to="/woningen" className="btn-primary">BEKIJK ALLE WONINGEN →</Link>
         </div>
       </div>
     </section>

@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
+import WoningenPage from './pages/WoningenPage';
 import LoginPage from './pages/LoginPage';
 import PropertyFormPage from './pages/PropertyFormPage';
 import { AuthProvider } from './context/AuthContext';
@@ -17,6 +18,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/woningen" element={<WoningenPage />} />
           <Route path="/property/:id" element={<PropertyDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route
