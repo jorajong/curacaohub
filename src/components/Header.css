@@ -59,6 +59,11 @@
   color: var(--secondary);
 }
 
+.nav-favorites {
+  font-size: 26px;
+  line-height: 1;
+}
+
 .btn-login {
   background: var(--secondary);
   color: white;
