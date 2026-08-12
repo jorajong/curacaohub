@@ -127,6 +127,41 @@
   background: #152843;
 }
 
+.natuurlijke-zoekbalk {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.natuurlijke-zoekbalk input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-dark);
+}
+
+.natuurlijke-zoekbalk button {
+  background: var(--secondary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.natuurlijke-zoekbalk button:hover {
+  opacity: 0.9;
+}
+
 @media (max-width: 768px) {
   .hero-image {
     height: 320px;
@@ -155,6 +190,10 @@
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     align-items: end;
+  }
+
+  .natuurlijke-zoekbalk {
+    flex-direction: column;
   }
 
   .search-group {

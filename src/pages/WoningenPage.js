@@ -4,16 +4,27 @@ import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firesto
 import { db } from '../firebase';
 import PropertyCard from '../components/PropertyCard';
 import { getDistinctLocaties } from '../utils/locaties';
+import { VOORZIENINGEN } from '../utils/voorzieningen';
 import './WoningenPage.css';
 
 const SLAAPKAMER_OPTIES = [1, 2, 3, 4, 5, 6];
 const GASTEN_OPTIES = [1, 2, 3, 4, 5, 6];
+
+const TYPE_LABELS = {
+  kamer: 'Kamer',
+  studio: 'Studio',
+  appartement: 'Appartement',
+  woning: 'Woning',
+};
+
+const VOORZIENINGEN_LABELS = Object.fromEntries(VOORZIENINGEN.map((v) => [v.key, v.label]));
 
 function mapDocToProperty(docSnap) {
   const d = docSnap.data();
   return {
     id: docSnap.id,
     name: d.naam,
+    type: d.type,
     location: d.locatie,
     image: Array.isArray(d.images) && d.images.length > 0 ? d.images[0] : '',
     tag: Array.isArray(d.tag) ? d.tag[0] : d.tag,
@@ -22,7 +33,10 @@ function mapDocToProperty(docSnap) {
     sqm: d.oppervlakte,
     price: d.prijs,
     valuta: d.valuta || 'EUR',
-    periode: d.periode || 'maand'
+    periode: d.periode || 'maand',
+    // Losse voorziening-velden meenemen zodat client-side gefilterd kan
+    // worden (Firestore zou voor elke combinatie een eigen index nodig hebben).
+    voorzieningen: d,
   };
 }
 
@@ -35,6 +49,8 @@ function WoningenPage() {
   const locatie = searchParams.get('locatie') || '';
   const slaapkamers = searchParams.get('slaapkamers') || '';
   const gasten = searchParams.get('gasten') || '';
+  const type = searchParams.get('type') || '';
+  const voorzieningenFilter = (searchParams.get('voorzieningen') || '').split(',').filter(Boolean);
   const alleenFavorieten = searchParams.get('favorieten') === 'true';
 
   useEffect(() => {
@@ -78,6 +94,12 @@ function WoningenPage() {
       if (gasten) {
         data = data.filter((p) => (p.guests || 0) >= Number(gasten));
       }
+      if (type) {
+        data = data.filter((p) => p.type === type);
+      }
+      if (voorzieningenFilter.length > 0) {
+        data = data.filter((p) => voorzieningenFilter.every((key) => p.voorzieningen?.[key] === true));
+      }
 
       setProperties(data);
     } catch (error) {
@@ -85,7 +107,7 @@ function WoningenPage() {
     } finally {
       setLoading(false);
     }
-  }, [locatie, slaapkamers, gasten, alleenFavorieten]);
+  }, [locatie, slaapkamers, gasten, type, voorzieningenFilter.join(','), alleenFavorieten]);
 
   useEffect(() => {
     fetchProperties();
@@ -101,10 +123,48 @@ function WoningenPage() {
     setSearchParams(params);
   };
 
+  const verwijderFilter = (key) => {
+    const params = new URLSearchParams(searchParams);
+    params.delete(key);
+    setSearchParams(params);
+  };
+
   return (
     <main className="woningen-page">
       <div className="container">
         <h1 className="page-title">{alleenFavorieten ? 'Mijn favorieten' : 'Alle woningen'}</h1>
+
+        {(type || voorzieningenFilter.length > 0) && (
+          <div className="actieve-filters">
+            {type && (
+              <span className="filter-chip">
+                {TYPE_LABELS[type] || type}
+                <button type="button" onClick={() => verwijderFilter('type')} aria-label="Filter verwijderen">×</button>
+              </span>
+            )}
+            {voorzieningenFilter.map((key) => (
+              <span key={key} className="filter-chip">
+                {VOORZIENINGEN_LABELS[key] || key}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const params = new URLSearchParams(searchParams);
+                    const overgebleven = voorzieningenFilter.filter((k) => k !== key);
+                    if (overgebleven.length > 0) {
+                      params.set('voorzieningen', overgebleven.join(','));
+                    } else {
+                      params.delete('voorzieningen');
+                    }
+                    setSearchParams(params);
+                  }}
+                  aria-label="Filter verwijderen"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="filter-bar">
           <div className="search-group">

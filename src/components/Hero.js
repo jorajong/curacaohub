@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 import heroImage from '../images/hero-scharloo.jpg';
 import { getDistinctLocaties } from '../utils/locaties';
+import { parseZoekopdracht } from '../utils/zoekParser';
 
 const SLAAPKAMER_OPTIES = [1, 2, 3, 4, 5, 6];
 const GASTEN_OPTIES = [1, 2, 3, 4, 5, 6];
@@ -13,6 +14,7 @@ function Hero() {
   const [locatie, setLocatie] = useState('');
   const [slaapkamers, setSlaapkamers] = useState('');
   const [gasten, setGasten] = useState('');
+  const [natuurlijkeZoekopdracht, setNatuurlijkeZoekopdracht] = useState('');
 
   useEffect(() => {
     getDistinctLocaties()
@@ -26,6 +28,16 @@ function Hero() {
     if (locatie) params.set('locatie', locatie);
     if (slaapkamers) params.set('slaapkamers', slaapkamers);
     if (gasten) params.set('gasten', gasten);
+    navigate(`/woningen?${params.toString()}`);
+  };
+
+  const handleNatuurlijkeZoekopdracht = (e) => {
+    e.preventDefault();
+    if (!natuurlijkeZoekopdracht.trim()) return;
+
+    const filters = parseZoekopdracht(natuurlijkeZoekopdracht, locaties);
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => params.set(key, value));
     navigate(`/woningen?${params.toString()}`);
   };
 
@@ -76,6 +88,16 @@ function Hero() {
           <button type="submit" className="search-btn">
             ZOEKEN
           </button>
+        </form>
+
+        <form onSubmit={handleNatuurlijkeZoekopdracht} className="natuurlijke-zoekbalk">
+          <input
+            type="text"
+            value={natuurlijkeZoekopdracht}
+            onChange={(e) => setNatuurlijkeZoekopdracht(e.target.value)}
+            placeholder="Of typ gewoon wat je zoekt, bijv. 'studio voor 2 personen met airco in Pietermaai'"
+          />
+          <button type="submit">Zoek</button>
         </form>
       </div>
     </section>
