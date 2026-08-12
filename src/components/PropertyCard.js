@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrijs, formatPeriode } from '../utils/currency';
 import './PropertyCard.css';
-import { Heart } from 'lucide-react';
+import { Heart, Users, Bed, Ruler } from 'lucide-react';
 
 function PropertyCard({ property }) {
   const [isFavoriet, setIsFavoriet] = useState(false);
@@ -40,10 +40,9 @@ function PropertyCard({ property }) {
         <h3>{property.name}</h3>
         <p className="location">{property.location}</p>
         <div className="property-details">
-          <span>👥 {property.guests} gasten</span>
-          <span>🛏️ {property.beds} kamers</span>
-          <span>📏 {property.sqm} m²</span>
-        </div>
+          <span><Users size={14} color="var(--primary)" /> {property.guests} gasten</span>
+          <span><Bed size={14} color="var(--primary)" /> {property.beds} kamers</span>
+          <span><Ruler size={14} color="var(--primary)" /> {property.sqm} m²</span>         </div>
         <div className="property-footer">
           <div className="price">
             <span className="amount">{formatPrijs(property.price, property.valuta)}</span>
