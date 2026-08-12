@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../images/logohub.png';
 import './Header.css';
+import { Heart } from 'lucide-react';
+
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,7 +23,7 @@ function Header() {
             <a href="#verhuurdersinfo">VERHUURDERSINFO</a>
             <a href="#over-ons">OVER ONS</a>
             <a href="#contact">CONTACT</a>
-            <Link to="/woningen?favorieten=true" className="nav-favorites" aria-label="Favorieten">❤️</Link>
+            <Link to="/woningen?favorieten=true" className="nav-favorites" aria-label="Favorieten"><Heart size={18} color="var(--primary)" /></Link>
             <Link to="/beheer/nieuwe-woning" className="btn-login">PLAATS JOUW WONING</Link>
           </nav>
 
@@ -39,7 +41,7 @@ function Header() {
           <nav id="mobile-nav" className="nav-mobile">
             <Link to="/" onClick={closeMenu}>HOME</Link>
             <Link to="/woningen" onClick={closeMenu}>WONINGEN</Link>
-            <Link to="/woningen?favorieten=true" onClick={closeMenu}>❤️ FAVORIETEN</Link>
+            <Link to="/woningen?favorieten=true" onClick={closeMenu} className="nav-favorites-mobile"><Heart size={16} color="var(--primary)" /> FAVORIETEN</Link>
             <a href="#verhuurdersinfo" onClick={closeMenu}>VERHUURDERSINFO</a>
             <a href="#over-ons" onClick={closeMenu}>OVER ONS</a>
             <a href="#contact" onClick={closeMenu}>CONTACT</a>

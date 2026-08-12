@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrijs, formatPeriode } from '../utils/currency';
 import './PropertyCard.css';
+import { Heart } from 'lucide-react';
 
 function PropertyCard({ property }) {
   const [isFavoriet, setIsFavoriet] = useState(false);
@@ -32,7 +33,7 @@ function PropertyCard({ property }) {
           onClick={toggleFavoriet}
           aria-label={isFavoriet ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}
         >
-          {isFavoriet ? '❤️' : '🤍'}
+          <Heart size={16} color="var(--primary)" fill={isFavoriet ? 'var(--primary)' : 'none'} />
         </button>
       </div>
       <div className="property-info">

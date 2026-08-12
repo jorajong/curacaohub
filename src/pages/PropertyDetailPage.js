@@ -130,7 +130,7 @@ function PropertyDetailPage() {
                 <div className="amenities-grid">
                   {actieveVoorzieningen.map((v) => (
                     <div key={v.key} className="amenity-item">
-                      <span className="amenity-icon">{v.icon}</span>
+                      <v.icon className="amenity-icon" size={22} strokeWidth={1.75} />
                       <span className="amenity-label">{v.label}</span>
                     </div>
                   ))}

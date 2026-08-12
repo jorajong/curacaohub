@@ -272,7 +272,7 @@ function PropertyFormPage() {
                     checked={!!voorzieningen[v.key]}
                     onChange={() => toggleVoorziening(v.key)}
                   />
-                  <span className="voorziening-icon">{v.icon}</span>
+                  <v.icon className="voorziening-icon" size={18} strokeWidth={1.75} />
                   <span>{v.label}</span>
                 </label>
               ))}
