@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { collection, doc, setDoc, updateDoc, getDoc, onSnapshot, query, where, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
@@ -11,7 +11,6 @@ const MAX_FOTOS = 4;
 function PropertyFormPage() {
   const { id } = useParams();
   const bewerkModus = Boolean(id);
-  const navigate = useNavigate();
 
   const [verhuurders, setVerhuurders] = useState([]);
   const [verhuurderId, setVerhuurderId] = useState('');
@@ -51,10 +50,16 @@ function PropertyFormPage() {
   // Zo blijft de volgorde (incl. hoofdfoto) kloppen, ongeacht herkomst.
   const [fotoItems, setFotoItems] = useState([]);
 
+  // Interne informatie — nooit zichtbaar voor bezoekers van de site.
+  const [opmerkingen, setOpmerkingen] = useState('');
+  const [huisregelsBestand, setHuisregelsBestand] = useState(null);
+  const [huisregelsUrl, setHuisregelsUrl] = useState('');
+  const [contractBestand, setContractBestand] = useState(null);
+  const [contractUrl, setContractUrl] = useState('');
+
   // Bewaart velden die dit formulier niet zelf beheert, zodat ze bij het
   // opslaan van een bewerking niet per ongeluk worden overschreven.
   const [gepubliceerd, setGepubliceerd] = useState(false);
-  const [aangemaaktOp, setAangemaaktOp] = useState(null);
 
   const [bezigMetLaden, setBezigMetLaden] = useState(bewerkModus);
   const [bezigMetOpslaan, setBezigMetOpslaan] = useState(false);
@@ -96,8 +101,11 @@ function PropertyFormPage() {
 
         setFotoItems((data.images || []).map((url) => ({ type: 'bestaand', url })));
 
+        setOpmerkingen(data.opmerkingen || '');
+        setHuisregelsUrl(data.huisregelsUrl || '');
+        setContractUrl(data.voorbeeldContractUrl || '');
+
         setGepubliceerd(!!data.gepubliceerd);
-        setAangemaaktOp(data.aangemaaktOp || null);
       } catch (error) {
         console.error(error);
         setFoutmelding('Woning laden is niet gelukt.');
@@ -168,6 +176,11 @@ function PropertyFormPage() {
     setTagInvoer('');
     setVoorzieningen({});
     setFotoItems([]);
+    setOpmerkingen('');
+    setHuisregelsBestand(null);
+    setHuisregelsUrl('');
+    setContractBestand(null);
+    setContractUrl('');
   };
 
   const handleSubmit = async (e) => {
@@ -204,6 +217,22 @@ function PropertyFormPage() {
         }
       }
 
+      // Interne documenten: alleen uploaden als er een nieuw bestand is
+      // gekozen, anders de bestaande URL (indien aanwezig) behouden.
+      let finaleHuisregelsUrl = huisregelsUrl;
+      if (huisregelsBestand) {
+        const bestandRef = ref(storage, `properties/${docRef.id}/huisregels`);
+        await uploadBytes(bestandRef, huisregelsBestand);
+        finaleHuisregelsUrl = await getDownloadURL(bestandRef);
+      }
+
+      let finaleContractUrl = contractUrl;
+      if (contractBestand) {
+        const bestandRef = ref(storage, `properties/${docRef.id}/voorbeeld-contract`);
+        await uploadBytes(bestandRef, contractBestand);
+        finaleContractUrl = await getDownloadURL(bestandRef);
+      }
+
       const woningData = {
         verhuurderId,
         naam: naam.trim(),
@@ -219,6 +248,9 @@ function PropertyFormPage() {
         periode,
         tag: alleTags,
         uitgelicht,
+        opmerkingen: opmerkingen.trim(),
+        huisregelsUrl: finaleHuisregelsUrl,
+        voorbeeldContractUrl: finaleContractUrl,
         ...voorzieningen,
       };
 
@@ -455,6 +487,50 @@ function PropertyFormPage() {
                 ))}
               </div>
             )}
+          </section>
+
+          <section className="form-section">
+            <h2>Interne informatie</h2>
+            <p className="form-hint">Deze gegevens zijn nooit zichtbaar voor bezoekers van de website.</p>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Huisregels</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,image/*"
+                  onChange={(e) => setHuisregelsBestand(e.target.files[0] || null)}
+                />
+                {huisregelsUrl && !huisregelsBestand && (
+                  <a href={huisregelsUrl} target="_blank" rel="noopener noreferrer" className="form-hint-link">
+                    Huidig bestand bekijken
+                  </a>
+                )}
+              </div>
+              <div className="form-group">
+                <label>Voorbeeld contract</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,image/*"
+                  onChange={(e) => setContractBestand(e.target.files[0] || null)}
+                />
+                {contractUrl && !contractBestand && (
+                  <a href={contractUrl} target="_blank" rel="noopener noreferrer" className="form-hint-link">
+                    Huidig bestand bekijken
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Opmerkingen</label>
+              <textarea
+                value={opmerkingen}
+                onChange={(e) => setOpmerkingen(e.target.value)}
+                rows="4"
+                placeholder="Interne notities over deze woning, verhuurder of afspraken..."
+              />
+            </div>
           </section>
 
           {foutmelding && <p className="form-error">{foutmelding}</p>}
