@@ -34,8 +34,10 @@ function Hero() {
       <div className="hero-image">
         <img src={heroImage} alt="Historisch pand in Scharloo, Curaçao" />
         <div className="hero-text">
-          <h1>Jouw huisvesting op Curaçao</h1>
-          <p>voor een verblijf van 1 - 6 maanden</p>
+          <div className="hero-text-inner">
+            <h1>Jouw huisvesting op Curaçao</h1>
+            <p>voor een verblijf van 1 - 6 maanden</p>
+          </div>
         </div>
       </div>
 
