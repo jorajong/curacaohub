@@ -7,6 +7,8 @@ import PropertyDetailPage from './pages/PropertyDetailPage';
 import WoningenPage from './pages/WoningenPage';
 import LoginPage from './pages/LoginPage';
 import PropertyFormPage from './pages/PropertyFormPage';
+import KantoorOverzichtPage from './pages/KantoorOverzichtPage';
+import VerhuurdersPage from './pages/VerhuurdersPage';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -23,6 +25,30 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/beheer/nieuwe-woning"
+            element={
+              <ProtectedRoute>
+                <PropertyFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/beheer/kantoor-overzicht"
+            element={
+              <ProtectedRoute>
+                <KantoorOverzichtPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/beheer/verhuurders"
+            element={
+              <ProtectedRoute>
+                <VerhuurdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/beheer/wijzig-woning/:id"
             element={
               <ProtectedRoute>
                 <PropertyFormPage />

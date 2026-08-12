@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { collection, doc, setDoc, updateDoc, getDoc, onSnapshot, query, where, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
 import { VOORZIENINGEN } from '../utils/voorzieningen';
@@ -8,6 +9,26 @@ import './PropertyFormPage.css';
 const MAX_FOTOS = 4;
 
 function PropertyFormPage() {
+  const { id } = useParams();
+  const bewerkModus = Boolean(id);
+  const navigate = useNavigate();
+
+  const [verhuurders, setVerhuurders] = useState([]);
+  const [verhuurderId, setVerhuurderId] = useState('');
+
+  useEffect(() => {
+    // Alleen actieve verhuurders zijn kiesbaar. Bij bewerken kan de gekoppelde
+    // verhuurder inmiddels niet-actief zijn — die wordt dan los toegevoegd
+    // zodat de keuze niet stilletjes verdwijnt.
+    const q = query(collection(db, 'verhuurders'), where('actief', '==', true));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) => (a.verhuurderNaam || '').localeCompare(b.verhuurderNaam || ''));
+      setVerhuurders(data);
+    });
+    return unsubscribe;
+  }, []);
+
   const [naam, setNaam] = useState('');
   const [locatie, setLocatie] = useState('');
   const [beschrijving, setBeschrijving] = useState('');
@@ -24,12 +45,67 @@ function PropertyFormPage() {
 
   const [voorzieningen, setVoorzieningen] = useState({});
 
-  const [fotos, setFotos] = useState([]);
-  const [fotoPreviews, setFotoPreviews] = useState([]);
+  // Elk item is { type: 'bestaand', url } voor foto's die al in Storage staan,
+  // of { type: 'nieuw', bestand, previewUrl } voor net geselecteerde bestanden.
+  // Zo blijft de volgorde (incl. hoofdfoto) kloppen, ongeacht herkomst.
+  const [fotoItems, setFotoItems] = useState([]);
 
+  // Bewaart velden die dit formulier niet zelf beheert, zodat ze bij het
+  // opslaan van een bewerking niet per ongeluk worden overschreven.
+  const [gepubliceerd, setGepubliceerd] = useState(false);
+  const [aangemaaktOp, setAangemaaktOp] = useState(null);
+
+  const [bezigMetLaden, setBezigMetLaden] = useState(bewerkModus);
   const [bezigMetOpslaan, setBezigMetOpslaan] = useState(false);
   const [foutmelding, setFoutmelding] = useState('');
   const [gelukt, setGelukt] = useState(false);
+
+  useEffect(() => {
+    if (!bewerkModus) return;
+
+    const woningOphalen = async () => {
+      setBezigMetLaden(true);
+      try {
+        const snap = await getDoc(doc(db, 'properties', id));
+        if (!snap.exists()) {
+          setFoutmelding('Deze woning kon niet worden gevonden.');
+          return;
+        }
+        const data = snap.data();
+
+        setVerhuurderId(data.verhuurderId || '');
+        setNaam(data.naam || '');
+        setLocatie(data.locatie || '');
+        setBeschrijving(data.beschrijving || '');
+        setOppervlakte(data.oppervlakte ?? '');
+        setSlaapkamers(data.slaapkamers ?? '');
+        setGasten(data.gasten ?? '');
+        setPrijs(data.prijs ?? '');
+        setValuta(data.valuta || 'EUR');
+        setPeriode(data.periode || 'maand');
+        setUitgelicht(!!data.uitgelicht);
+        setTags(data.tag || []);
+
+        const bestaandeVoorzieningen = {};
+        VOORZIENINGEN.forEach((v) => {
+          bestaandeVoorzieningen[v.key] = !!data[v.key];
+        });
+        setVoorzieningen(bestaandeVoorzieningen);
+
+        setFotoItems((data.images || []).map((url) => ({ type: 'bestaand', url })));
+
+        setGepubliceerd(!!data.gepubliceerd);
+        setAangemaaktOp(data.aangemaaktOp || null);
+      } catch (error) {
+        console.error(error);
+        setFoutmelding('Woning laden is niet gelukt.');
+      } finally {
+        setBezigMetLaden(false);
+      }
+    };
+
+    woningOphalen();
+  }, [id, bewerkModus]);
 
   const toggleVoorziening = (key) => {
     setVoorzieningen((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -54,20 +130,27 @@ function PropertyFormPage() {
   };
 
   const handleFotoSelectie = (e) => {
-    const geselecteerd = Array.from(e.target.files);
-    const totaal = [...fotos, ...geselecteerd].slice(0, MAX_FOTOS);
-    setFotos(totaal);
-    setFotoPreviews(totaal.map((bestand) => URL.createObjectURL(bestand)));
+    const geselecteerd = Array.from(e.target.files).map((bestand) => ({
+      type: 'nieuw',
+      bestand,
+      previewUrl: URL.createObjectURL(bestand),
+    }));
+    setFotoItems((prev) => [...prev, ...geselecteerd].slice(0, MAX_FOTOS));
     e.target.value = '';
   };
 
   const verwijderFoto = (index) => {
-    const nieuweFotos = fotos.filter((_, i) => i !== index);
-    setFotos(nieuweFotos);
-    setFotoPreviews(nieuweFotos.map((bestand) => URL.createObjectURL(bestand)));
+    setFotoItems((prev) => {
+      const item = prev[index];
+      if (item?.type === 'nieuw') {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const resetFormulier = () => {
+    setVerhuurderId('');
     setNaam('');
     setLocatie('');
     setBeschrijving('');
@@ -81,8 +164,7 @@ function PropertyFormPage() {
     setTags([]);
     setTagInvoer('');
     setVoorzieningen({});
-    setFotos([]);
-    setFotoPreviews([]);
+    setFotoItems([]);
   };
 
   const handleSubmit = async (e) => {
@@ -90,8 +172,8 @@ function PropertyFormPage() {
     setFoutmelding('');
     setGelukt(false);
 
-    if (!naam.trim() || !locatie.trim() || !prijs || !beschrijving.trim()) {
-      setFoutmelding('Vul minimaal naam, locatie, prijs en beschrijving in.');
+    if (!verhuurderId || !naam.trim() || !locatie.trim() || !prijs || !beschrijving.trim()) {
+      setFoutmelding('Vul minimaal verhuurder, naam, locatie, prijs en beschrijving in.');
       return;
     }
 
@@ -102,20 +184,25 @@ function PropertyFormPage() {
     const alleTags = tagInvoer.trim() ? [...tags, tagInvoer.trim()] : tags;
 
     try {
-      // Doc-ID alvast genereren, zodat foto's in Storage een map krijgen
-      // die overeenkomt met het Firestore-document.
-      const nieuwDocRef = doc(collection(db, 'properties'));
+      const docRef = bewerkModus ? doc(db, 'properties', id) : doc(collection(db, 'properties'));
 
+      // Bestaande foto's blijven gewoon hun URL houden; alleen nieuw
+      // geselecteerde bestanden worden nu geüpload.
       const imageUrls = [];
-      for (let i = 0; i < fotos.length; i++) {
-        const bestand = fotos[i];
-        const fotoRef = ref(storage, `properties/${nieuwDocRef.id}/foto-${i + 1}`);
-        await uploadBytes(fotoRef, bestand);
-        const url = await getDownloadURL(fotoRef);
-        imageUrls.push(url);
+      for (let i = 0; i < fotoItems.length; i++) {
+        const item = fotoItems[i];
+        if (item.type === 'bestaand') {
+          imageUrls.push(item.url);
+        } else {
+          const fotoRef = ref(storage, `properties/${docRef.id}/foto-${i + 1}`);
+          await uploadBytes(fotoRef, item.bestand);
+          const url = await getDownloadURL(fotoRef);
+          imageUrls.push(url);
+        }
       }
 
-      await setDoc(nieuwDocRef, {
+      const woningData = {
+        verhuurderId,
         naam: naam.trim(),
         locatie: locatie.trim(),
         beschrijving: beschrijving.trim(),
@@ -128,15 +215,29 @@ function PropertyFormPage() {
         periode,
         tag: alleTags,
         uitgelicht,
-        // Concept bij opslaan vanuit dit formulier — pas op kantoor
-        // wordt dit veld op true gezet en verschijnt de woning live.
-        gepubliceerd: false,
         ...voorzieningen,
-        aangemaaktOp: serverTimestamp(),
-      });
+      };
 
-      setGelukt(true);
-      resetFormulier();
+      if (bewerkModus) {
+        // Gepubliceerd-status blijft ongewijzigd — dat wordt alleen via
+        // het kantoor-overzicht aan- of uitgezet, niet via dit formulier.
+        await updateDoc(docRef, {
+          ...woningData,
+          gepubliceerd,
+          bijgewerktOp: serverTimestamp(),
+        });
+        setGelukt(true);
+      } else {
+        await setDoc(docRef, {
+          ...woningData,
+          // Concept bij opslaan vanuit dit formulier — pas op kantoor
+          // wordt dit veld op true gezet en verschijnt de woning live.
+          gepubliceerd: false,
+          aangemaaktOp: serverTimestamp(),
+        });
+        setGelukt(true);
+        resetFormulier();
+      }
     } catch (error) {
       console.error(error);
       setFoutmelding('Opslaan is niet gelukt. Probeer het opnieuw.');
@@ -145,22 +246,58 @@ function PropertyFormPage() {
     }
   };
 
+  if (bezigMetLaden) {
+    return (
+      <main className="property-form-page">
+        <div className="container">
+          <p>Woning laden...</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="property-form-page">
       <div className="container">
-        <h1>Nieuwe woning toevoegen</h1>
+        <div className="form-header">
+          <h1>{bewerkModus ? 'Woning bewerken' : 'Nieuwe woning toevoegen'}</h1>
+          <Link to="/beheer/kantoor-overzicht">Naar kantoor-overzicht →</Link>
+        </div>
         <p className="form-intro">
-          Dit formulier slaat de woning op als concept. De woning verschijnt pas op de
-          site nadat deze op kantoor is gecontroleerd en gepubliceerd.
+          {bewerkModus
+            ? 'Wijzigingen worden direct opgeslagen op de bestaande woning. De publicatiestatus zelf wijzig je in het kantoor-overzicht.'
+            : 'Dit formulier slaat de woning op als concept. De woning verschijnt pas op de site nadat deze op kantoor is gecontroleerd en gepubliceerd.'}
         </p>
 
         {gelukt && (
           <div className="form-success">
-            Woning opgeslagen als concept. Op kantoor wordt deze binnenkort gecontroleerd en gepubliceerd.
+            {bewerkModus
+              ? 'Wijzigingen opgeslagen.'
+              : 'Woning opgeslagen als concept. Op kantoor wordt deze binnenkort gecontroleerd en gepubliceerd.'}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="property-form">
+          <section className="form-section">
+            <h2>Verhuurder</h2>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Verhuurder *</label>
+                <select value={verhuurderId} onChange={(e) => setVerhuurderId(e.target.value)} required>
+                  <option value="">Kies een verhuurder...</option>
+                  {verhuurders.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.verhuurderNaam}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <Link to="/beheer/verhuurders" target="_blank" className="form-hint-link">
+              + Nieuwe verhuurder registreren (opent in nieuw tabblad)
+            </Link>
+          </section>
+
           <section className="form-section">
             <h2>Algemene informatie</h2>
             <div className="form-row">
@@ -287,13 +424,13 @@ function PropertyFormPage() {
               accept="image/*"
               multiple
               onChange={handleFotoSelectie}
-              disabled={fotos.length >= MAX_FOTOS}
+              disabled={fotoItems.length >= MAX_FOTOS}
             />
-            {fotoPreviews.length > 0 && (
+            {fotoItems.length > 0 && (
               <div className="foto-previews">
-                {fotoPreviews.map((url, index) => (
+                {fotoItems.map((item, index) => (
                   <div key={index} className="foto-preview">
-                    <img src={url} alt={`Foto ${index + 1}`} />
+                    <img src={item.type === 'bestaand' ? item.url : item.previewUrl} alt={`Foto ${index + 1}`} />
                     {index === 0 && <span className="hoofdfoto-badge">Hoofdfoto</span>}
                     <button type="button" onClick={() => verwijderFoto(index)} aria-label="Foto verwijderen">
                       ×
@@ -307,7 +444,11 @@ function PropertyFormPage() {
           {foutmelding && <p className="form-error">{foutmelding}</p>}
 
           <button type="submit" className="btn-primary btn-full" disabled={bezigMetOpslaan}>
-            {bezigMetOpslaan ? 'BEZIG MET OPSLAAN...' : 'OPSLAAN ALS CONCEPT'}
+            {bezigMetOpslaan
+              ? 'BEZIG MET OPSLAAN...'
+              : bewerkModus
+              ? 'WIJZIGINGEN OPSLAAN'
+              : 'OPSLAAN ALS CONCEPT'}
           </button>
         </form>
       </div>
