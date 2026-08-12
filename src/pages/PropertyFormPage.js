@@ -30,6 +30,7 @@ function PropertyFormPage() {
   }, []);
 
   const [naam, setNaam] = useState('');
+  const [type, setType] = useState('appartement');
   const [locatie, setLocatie] = useState('');
   const [beschrijving, setBeschrijving] = useState('');
   const [oppervlakte, setOppervlakte] = useState('');
@@ -75,6 +76,7 @@ function PropertyFormPage() {
 
         setVerhuurderId(data.verhuurderId || '');
         setNaam(data.naam || '');
+        setType(data.type || 'appartement');
         setLocatie(data.locatie || '');
         setBeschrijving(data.beschrijving || '');
         setOppervlakte(data.oppervlakte ?? '');
@@ -152,6 +154,7 @@ function PropertyFormPage() {
   const resetFormulier = () => {
     setVerhuurderId('');
     setNaam('');
+    setType('appartement');
     setLocatie('');
     setBeschrijving('');
     setOppervlakte('');
@@ -204,6 +207,7 @@ function PropertyFormPage() {
       const woningData = {
         verhuurderId,
         naam: naam.trim(),
+        type,
         locatie: locatie.trim(),
         beschrijving: beschrijving.trim(),
         images: imageUrls,
@@ -305,6 +309,18 @@ function PropertyFormPage() {
                 <label>Naam woning *</label>
                 <input type="text" value={naam} onChange={(e) => setNaam(e.target.value)} required />
               </div>
+              <div className="form-group">
+                <label>Type woning *</label>
+                <select value={type} onChange={(e) => setType(e.target.value)} required>
+                  <option value="kamer">Kamer</option>
+                  <option value="studio">Studio</option>
+                  <option value="appartement">Appartement</option>
+                  <option value="woning">Woning</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
                 <label>Locatie *</label>
                 <input

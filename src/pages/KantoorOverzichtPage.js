@@ -7,7 +7,9 @@ import './KantoorOverzichtPage.css';
 
 function KantoorOverzichtPage() {
   const [woningen, setWoningen] = useState([]);
+  const [verhuurders, setVerhuurders] = useState({});
   const [laden, setLaden] = useState(true);
+  const [uitgeklapt, setUitgeklapt] = useState(null);
 
   useEffect(() => {
     // onSnapshot i.p.v. eenmalig ophalen: als een collega ergens anders
@@ -17,6 +19,19 @@ function KantoorOverzichtPage() {
       data.sort((a, b) => (a.naam || '').localeCompare(b.naam || ''));
       setWoningen(data);
       setLaden(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    // Alle verhuurders (ook niet-actieve) in een lookup-object per ID, zodat
+    // de details per woning meteen te tonen zijn zonder losse ophaal-actie.
+    const unsubscribe = onSnapshot(collection(db, 'verhuurders'), (snapshot) => {
+      const lookup = {};
+      snapshot.docs.forEach((d) => {
+        lookup[d.id] = { id: d.id, ...d.data() };
+      });
+      setVerhuurders(lookup);
     });
     return unsubscribe;
   }, []);
@@ -36,6 +51,10 @@ function KantoorOverzichtPage() {
         prev.map((w) => (w.id === id ? { ...w, [veld]: huidigeWaarde } : w))
       );
     }
+  };
+
+  const toggleDetails = (id) => {
+    setUitgeklapt((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -66,51 +85,118 @@ function KantoorOverzichtPage() {
               <span>Gepubliceerd</span>
               <span>Uitgelicht</span>
               <span></span>
+              <span></span>
             </div>
 
-            {woningen.map((w) => (
-              <div key={w.id} className="kantoor-rij">
-                <span className="kantoor-foto">
-                  {w.images && w.images[0] ? (
-                    <img src={w.images[0]} alt={w.naam} />
-                  ) : (
-                    <span className="kantoor-foto-placeholder" />
+            {woningen.map((w) => {
+              const verhuurder = verhuurders[w.verhuurderId];
+              return (
+                <React.Fragment key={w.id}>
+                  <div className="kantoor-rij">
+                    <span className="kantoor-foto">
+                      {w.images && w.images[0] ? (
+                        <img src={w.images[0]} alt={w.naam} />
+                      ) : (
+                        <span className="kantoor-foto-placeholder" />
+                      )}
+                    </span>
+                    <span className="kantoor-naam">
+                      <Link to={`/property/${w.id}`}>{w.naam || '(geen naam)'}</Link>
+                    </span>
+                    <span>{w.locatie || '-'}</span>
+                    <span>
+                      {w.prijs ? `${formatPrijs(w.prijs, w.valuta)} ${formatPeriode(w.periode)}` : '-'}
+                    </span>
+                    <span>
+                      <label className="toggle">
+                        <input
+                          type="checkbox"
+                          checked={!!w.gepubliceerd}
+                          onChange={() => toggleVeld(w.id, 'gepubliceerd', w.gepubliceerd)}
+                        />
+                        <span className="toggle-slider" />
+                      </label>
+                    </span>
+                    <span>
+                      <label className="toggle">
+                        <input
+                          type="checkbox"
+                          checked={!!w.uitgelicht}
+                          onChange={() => toggleVeld(w.id, 'uitgelicht', w.uitgelicht)}
+                        />
+                        <span className="toggle-slider" />
+                      </label>
+                    </span>
+                    <span>
+                      <Link to={`/beheer/wijzig-woning/${w.id}`} className="kantoor-bewerken">
+                        Bewerken
+                      </Link>
+                    </span>
+                    <span>
+                      <button type="button" className="kantoor-details-btn" onClick={() => toggleDetails(w.id)}>
+                        {uitgeklapt === w.id ? 'Verberg' : 'Details'}
+                      </button>
+                    </span>
+                  </div>
+
+                  {uitgeklapt === w.id && (
+                    <div className="kantoor-details-paneel">
+                      <div className="kantoor-details-blok">
+                        <h3>Verhuurder</h3>
+                        {verhuurder ? (
+                          <>
+                            <p><strong>{verhuurder.verhuurderNaam}</strong></p>
+                            <p>{verhuurder.verhuurderTelefoon} · {verhuurder.verhuurderEmail}</p>
+                            {verhuurder.verhuurderIdFoto && (
+                              <a href={verhuurder.verhuurderIdFoto} target="_blank" rel="noopener noreferrer">
+                                ID verhuurder bekijken
+                              </a>
+                            )}
+                          </>
+                        ) : (
+                          <p>Geen verhuurder gekoppeld.</p>
+                        )}
+                      </div>
+
+                      <div className="kantoor-details-blok">
+                        <h3>Beheerder</h3>
+                        {verhuurder ? (
+                          <>
+                            <p><strong>{verhuurder.beheerderNaam}</strong></p>
+                            <p>{verhuurder.beheerderTelefoon} · {verhuurder.beheerderEmail}</p>
+                            {verhuurder.beheerderIdFoto && (
+                              <a href={verhuurder.beheerderIdFoto} target="_blank" rel="noopener noreferrer">
+                                ID beheerder bekijken
+                              </a>
+                            )}
+                          </>
+                        ) : (
+                          <p>-</p>
+                        )}
+                      </div>
+
+                      <div className="kantoor-details-blok">
+                        <h3>Documenten</h3>
+                        {w.huisregelsUrl && (
+                          <a href={w.huisregelsUrl} target="_blank" rel="noopener noreferrer">Huisregels bekijken</a>
+                        )}
+                        {w.voorbeeldContractUrl && (
+                          <a href={w.voorbeeldContractUrl} target="_blank" rel="noopener noreferrer">Voorbeeld contract bekijken</a>
+                        )}
+                        {!w.huisregelsUrl && !w.voorbeeldContractUrl && <p>Geen documenten geüpload.</p>}
+                      </div>
+
+                      {w.opmerkingen && (
+                        <div className="kantoor-details-blok">
+                          <h3>Opmerkingen</h3>
+                          <p>{w.opmerkingen}</p>
+                        </div>
+                      )}
+                    </div>
                   )}
-                </span>
-                <span className="kantoor-naam">
-                  <Link to={`/property/${w.id}`}>{w.naam || '(geen naam)'}</Link>
-                </span>
-                <span>{w.locatie || '-'}</span>
-                <span>
-                  {w.prijs ? `${formatPrijs(w.prijs, w.valuta)} ${formatPeriode(w.periode)}` : '-'}
-                </span>
-                <span>
-                  <label className="toggle">
-                    <input
-                      type="checkbox"
-                      checked={!!w.gepubliceerd}
-                      onChange={() => toggleVeld(w.id, 'gepubliceerd', w.gepubliceerd)}
-                    />
-                    <span className="toggle-slider" />
-                  </label>
-                </span>
-                <span>
-                  <label className="toggle">
-                    <input
-                      type="checkbox"
-                      checked={!!w.uitgelicht}
-                      onChange={() => toggleVeld(w.id, 'uitgelicht', w.uitgelicht)}
-                    />
-                    <span className="toggle-slider" />
-                  </label>
-                </span>
-                <span>
-                  <Link to={`/beheer/wijzig-woning/${w.id}`} className="kantoor-bewerken">
-                    Bewerken
-                  </Link>
-                </span>
-              </div>
-            ))}
+                </React.Fragment>
+              );
+            })}
           </div>
         )}
       </div>

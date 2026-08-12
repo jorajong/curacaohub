@@ -3,7 +3,7 @@
 // De volgorde hier bepaalt ook de volgorde waarin ze getoond worden.
 import {
   Waves, Wifi, Fan, Car, Shirt, SprayCan, DoorOpen, ChefHat,
-  Sofa, CigaretteOff, TreePine, Tv, Bed, Flame
+  Sofa, CigaretteOff, TreePine, Tv, Bed, Flame, UtensilsCrossed, Bath
 } from 'lucide-react';
 
 export const VOORZIENINGEN = [
@@ -15,6 +15,8 @@ export const VOORZIENINGEN = [
   { key: 'schoonmaak', icon: SprayCan, label: 'Schoonmaak inbegrepen' },
   { key: 'balkon', icon: DoorOpen, label: 'Balkon' },
   { key: 'keuken', icon: ChefHat, label: 'Keuken' },
+  { key: 'gedeeldeKeuken', icon: UtensilsCrossed, label: 'Gedeelde keuken' },
+  { key: 'gedeeldeBadkamer', icon: Bath, label: 'Gedeelde badkamer' },
   { key: 'gemeubileerd', icon: Sofa, label: 'Gemeubileerd' },
   { key: 'rookvrij', icon: CigaretteOff, label: 'Rookvrij' },
   { key: 'tuin', icon: TreePine, label: 'Tuin' },

@@ -6,6 +6,13 @@ import { formatPrijs, formatPeriode } from '../utils/currency';
 import { VOORZIENINGEN } from '../utils/voorzieningen';
 import './PropertyDetailPage.css';
 
+const TYPE_LABELS = {
+  kamer: 'Kamer',
+  studio: 'Studio',
+  appartement: 'Appartement',
+  woning: 'Woning',
+};
+
 function PropertyDetailPage() {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
@@ -141,6 +148,10 @@ function PropertyDetailPage() {
             <section className="property-section">
               <h2>Beschrijving</h2>
               <div className="details-grid">
+                <div className="detail-item">
+                  <label>Type woning</label>
+                  <span>{TYPE_LABELS[property.type] || 'Appartement'}</span>
+                </div>
                 <div className="detail-item">
                   <label>Aantal gasten</label>
                   <span>{property.gasten} gasten</span>
