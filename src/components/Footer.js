@@ -8,7 +8,7 @@ function Footer() {
         <div className="footer-content">
           <div className="footer-section">
             <h3>OVER HUB</h3>
-            <p className="tagline">Huisvesting voor unieke breaks op Curaçao</p>
+            <p className="tagline">Jouw huisvesting op Curaçao voor 1 - 6 maanden</p>
             <p className="description">
               Wonen in een huisje is veel beter dan in hotels. Rechtstreeks van eigenaar tot gast.
             </p>

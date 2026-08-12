@@ -126,6 +126,12 @@
   text-align: center;
 }
 
+.nav-mobile-favorites {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 @media (max-width: 768px) {
   .nav-desktop {
     display: none;
