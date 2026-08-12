@@ -74,7 +74,7 @@ function Hero() {
           </div>
 
           <button type="submit" className="search-btn">
-            <span>🔍</span> ZOEKEN
+            ZOEKEN
           </button>
         </form>
       </div>
