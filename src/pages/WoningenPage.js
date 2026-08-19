@@ -28,6 +28,7 @@ function mapDocToProperty(docSnap) {
     location: d.locatie,
     image: Array.isArray(d.images) && d.images.length > 0 ? d.images[0] : '',
     tag: Array.isArray(d.tag) ? d.tag[0] : d.tag,
+    tags: Array.isArray(d.tag) ? d.tag : [],
     guests: d.gasten,
     beds: d.slaapkamers,
     sqm: d.oppervlakte,
@@ -52,6 +53,7 @@ function WoningenPage() {
   const type = searchParams.get('type') || '';
   const voorzieningenFilter = (searchParams.get('voorzieningen') || '').split(',').filter(Boolean);
   const voorzieningenParam = searchParams.get('voorzieningen') || '';
+  const tekst = searchParams.get('tekst') || '';
   const alleenFavorieten = searchParams.get('favorieten') === 'true';
 
   useEffect(() => {
@@ -102,6 +104,13 @@ function WoningenPage() {
       if (voorzieningenKeys.length > 0) {
         data = data.filter((p) => voorzieningenKeys.every((key) => p.voorzieningen?.[key] === true));
       }
+      if (tekst) {
+        const zoekwoorden = tekst.toLowerCase().split(/\s+/).filter(Boolean);
+        data = data.filter((p) => {
+          const doorzoekbareTekst = `${p.name || ''} ${(p.tags || []).join(' ')}`.toLowerCase();
+          return zoekwoorden.every((woord) => doorzoekbareTekst.includes(woord));
+        });
+      }
 
       setProperties(data);
     } catch (error) {
@@ -109,7 +118,7 @@ function WoningenPage() {
     } finally {
       setLoading(false);
     }
-  }, [locatie, slaapkamers, gasten, type, voorzieningenParam, alleenFavorieten]);
+  }, [locatie, slaapkamers, gasten, type, voorzieningenParam, tekst, alleenFavorieten]);
 
   useEffect(() => {
     fetchProperties();
@@ -136,8 +145,14 @@ function WoningenPage() {
       <div className="container">
         <h1 className="page-title">{alleenFavorieten ? 'Mijn favorieten' : 'Alle woningen'}</h1>
 
-        {(type || voorzieningenFilter.length > 0) && (
+        {(type || voorzieningenFilter.length > 0 || tekst) && (
           <div className="actieve-filters">
+            {tekst && (
+              <span className="filter-chip">
+                "{tekst}"
+                <button type="button" onClick={() => verwijderFilter('tekst')} aria-label="Filter verwijderen">×</button>
+              </span>
+            )}
             {type && (
               <span className="filter-chip">
                 {TYPE_LABELS[type] || type}

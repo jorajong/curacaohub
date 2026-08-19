@@ -38,20 +38,38 @@ const TYPE_SYNONIEMEN = {
   woning: ['woning', 'huis', 'villa'],
 };
 
+// Woorden die op zichzelf niets betekenen voor de zoekopdracht en dus nooit
+// als "restwoord" (vrije tekst) meegenomen moeten worden.
+const NEGEER_WOORDEN = [
+  'ik', 'zoek', 'zoeken', 'een', 'voor', 'met', 'in', 'de', 'het', 'van',
+  'op', 'en', 'of', 'graag', 'wil', 'naar', 'plek', 'plekje', 'alstublieft',
+  'alsjeblieft', 'is', 'er', 'die', 'dat', 'wat', 'heb', 'hebben',
+];
+
 export function parseZoekopdracht(tekst, locaties = []) {
   const query = ` ${tekst.toLowerCase()} `;
   const resultaat = {};
+
+  // Bijhouden welke stukjes tekst al "verklaard" zijn door een herkend
+  // filter, zodat aan het einde duidelijk is wat er onherkend overblijft
+  // (bijv. een woningnaam als "Penthouse").
+  let rest = query;
+  const verwijderUitRest = (stukje) => {
+    rest = rest.replace(stukje, ' ');
+  };
 
   // Gasten: "2 personen", "2 gasten", "voor 2 personen"
   const gastenMatch = query.match(/(\d+)\s*(personen|persoon|gasten|gast)/);
   if (gastenMatch) {
     resultaat.gasten = gastenMatch[1];
+    verwijderUitRest(gastenMatch[0]);
   }
 
   // Slaapkamers: "3 slaapkamers", "2 slaapkamer"
   const slaapkamerMatch = query.match(/(\d+)\s*(slaapkamers|slaapkamer)/);
   if (slaapkamerMatch) {
     resultaat.slaapkamers = slaapkamerMatch[1];
+    verwijderUitRest(slaapkamerMatch[0]);
   }
 
   // Type woning: eerste match wint (een zin noemt normaliter maar één type).
@@ -60,6 +78,8 @@ export function parseZoekopdracht(tekst, locaties = []) {
   );
   if (gevondenType) {
     resultaat.type = gevondenType[0];
+    const gevondenWoord = gevondenType[1].find((woord) => query.includes(woord));
+    verwijderUitRest(gevondenWoord);
   }
 
   // Locatie: langste naam eerst controleren, zodat een locatie die toevallig
@@ -68,16 +88,35 @@ export function parseZoekopdracht(tekst, locaties = []) {
   const gevondenLocatie = gesorteerdeLocaties.find((loc) => query.includes(loc.toLowerCase()));
   if (gevondenLocatie) {
     resultaat.locatie = gevondenLocatie;
+    verwijderUitRest(gevondenLocatie.toLowerCase());
   }
 
   // Voorzieningen: elk woord uit de synoniemenlijst checken.
-  const gevondenVoorzieningen = VOORZIENINGEN.filter((v) => {
+  const gevondenVoorzieningen = [];
+  VOORZIENINGEN.forEach((v) => {
     const synoniemen = VOORZIENING_SYNONIEMEN[v.key] || [v.label.toLowerCase()];
-    return synoniemen.some((woord) => query.includes(woord));
-  }).map((v) => v.key);
+    const gevondenWoord = synoniemen.find((woord) => query.includes(woord));
+    if (gevondenWoord) {
+      gevondenVoorzieningen.push(v.key);
+      verwijderUitRest(gevondenWoord);
+    }
+  });
 
   if (gevondenVoorzieningen.length > 0) {
     resultaat.voorzieningen = gevondenVoorzieningen.join(',');
+  }
+
+  // Alles wat overblijft en geen negeerwoord is, is vermoedelijk een
+  // woningnaam of ander kenmerk dat niet als los filter bestaat (bijv.
+  // "Penthouse") — dat gebruiken we als vrije-tekstzoekopdracht op naam/tags,
+  // zodat de site niet stilletjes alles teruggeeft als er niets herkend is.
+  const restWoorden = rest
+    .split(/\s+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 3 && !NEGEER_WOORDEN.includes(w));
+
+  if (restWoorden.length > 0) {
+    resultaat.tekst = restWoorden.join(' ');
   }
 
   return resultaat;
