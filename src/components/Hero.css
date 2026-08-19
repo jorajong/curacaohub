@@ -63,7 +63,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.search-box form {
+.hoofd-zoekformulier {
   display: flex;
   gap: 15px;
   align-items: flex-end;
@@ -185,7 +185,7 @@
   }
 
   /* 2 aan 2: locatie+gasten op de eerste rij, slaapkamers+zoekknop op de tweede */
-  .search-box form {
+  .hoofd-zoekformulier {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;

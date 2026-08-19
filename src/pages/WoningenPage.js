@@ -51,6 +51,7 @@ function WoningenPage() {
   const gasten = searchParams.get('gasten') || '';
   const type = searchParams.get('type') || '';
   const voorzieningenFilter = (searchParams.get('voorzieningen') || '').split(',').filter(Boolean);
+  const voorzieningenParam = searchParams.get('voorzieningen') || '';
   const alleenFavorieten = searchParams.get('favorieten') === 'true';
 
   useEffect(() => {
@@ -62,6 +63,7 @@ function WoningenPage() {
   const fetchProperties = useCallback(async () => {
     setLoading(true);
     try {
+      const voorzieningenKeys = voorzieningenParam.split(',').filter(Boolean);
       let data;
 
       if (alleenFavorieten) {
@@ -97,8 +99,8 @@ function WoningenPage() {
       if (type) {
         data = data.filter((p) => p.type === type);
       }
-      if (voorzieningenFilter.length > 0) {
-        data = data.filter((p) => voorzieningenFilter.every((key) => p.voorzieningen?.[key] === true));
+      if (voorzieningenKeys.length > 0) {
+        data = data.filter((p) => voorzieningenKeys.every((key) => p.voorzieningen?.[key] === true));
       }
 
       setProperties(data);
@@ -107,7 +109,7 @@ function WoningenPage() {
     } finally {
       setLoading(false);
     }
-  }, [locatie, slaapkamers, gasten, type, voorzieningenFilter.join(','), alleenFavorieten]);
+  }, [locatie, slaapkamers, gasten, type, voorzieningenParam, alleenFavorieten]);
 
   useEffect(() => {
     fetchProperties();

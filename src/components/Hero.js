@@ -54,7 +54,7 @@ function Hero() {
       </div>
 
       <div className="search-box">
-        <form onSubmit={handleSearch}>
+        <form onSubmit={handleSearch} className="hoofd-zoekformulier">
           <div className="search-group">
             <label>LOCATIE</label>
             <select value={locatie} onChange={(e) => setLocatie(e.target.value)}>
